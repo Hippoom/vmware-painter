@@ -2,6 +2,8 @@ require 'neography'
 require 'yaml'
 require 'rbvmomi'
 require 'optparse'
+require 'logger'
+
 
 options = {}
 
@@ -16,7 +18,17 @@ config = YAML.load_file(options[:config])
 
 vcenter = config["vcenter"]
 neo4j = config["neo4j"]
+logging = config["logging"]
 
+log = Logger.new STDOUT
+log.formatter = proc do |severity, datetime, progname, msg|
+    date_format = datetime.strftime("%Y-%m-%d'T'%H:%M:%S.%L%z")
+    "[#{date_format}] [#{severity}]: #{msg}\n"
+end
+
+if logging
+  log.level = Logger.const_get(logging["level"]) if logging["level"]
+end
 
 Neography.configure do |config|
   config.server               = neo4j["host"]
@@ -34,6 +46,7 @@ host_group = host_noncluster_group.concat(host_cluster_group.map{|cluster| clust
 
 host_group.each do |host|
 
+  log.debug "Begin to paint #{host._ref}..."
   # HostSystem
   host_node = Neography::Node.create_unique("idx_host",
     "id",
@@ -52,6 +65,7 @@ host_group.each do |host|
 
   # Datastore
   datastore_nodes = host.datastore.map do |ds|
+    log.debug "Begin to paint #{ds._ref}."
     datastore_node = Neography::Node.create_unique("idx_datastore",
       "id",
       ds._ref,
@@ -68,11 +82,13 @@ host_group.each do |host|
       "mountedAt",
       datastore_node,
       host_node)
+    log.debug "Finish to paint #{ds._ref}."
     datastore_node
   end
 
   # VirtualMachine
   host.vm.each do |vm|
+    log.debug "Begin to paint #{vm._ref}."
     vm_node = Neography::Node.create_unique("idx_vm",
       "id",
       vm._ref,
@@ -101,5 +117,7 @@ host_group.each do |host|
         datastore_node,
         vm_node)
     end
+    log.debug "Finish to paint #{vm._ref}."
   end
+  log.debug "Finish to paint #{host._ref}."
 end
