@@ -1,8 +1,19 @@
 require 'neography'
 require 'yaml'
 require 'rbvmomi'
+require 'optparse'
 
-config = YAML.load_file("vmware.dev.yml")
+options = {}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: painter.rb [options]"
+
+  opts.on('-c', '--config=<config file path>', 'Config file path') { |v| options[:config] = v }
+
+end.parse!
+
+config = YAML.load_file(options[:config])
+
 vcenter = config["vcenter"]
 neo4j = config["neo4j"]
 
