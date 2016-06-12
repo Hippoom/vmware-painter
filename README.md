@@ -1,10 +1,11 @@
 # vmware-painter
 
-Painter for VMware
+Painter for VMware, current release is `3-e24b871`
 
 ## How to run it
 
-    docker run --rm -it -v <your config file>:/etc/scaleworks/graph/vmware.yml scaleworks/vmware-painter:<version>
+    docker run --rm -it -v <your config file>:/etc/scaleworks/graph/vmware.yml index.alauda.cn/scaleworks/vmware-painter:<version>
+
 
 The configuration items are listed here:
 
@@ -31,4 +32,5 @@ You can run the painter with
 
     ruby lib/painter -c ./vmware.dev.yml
 
+You can find the build pipeline [here](https://10.202.128.140:8154/go/tab/pipeline/history/vmware-painter-build).
 
