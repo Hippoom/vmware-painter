@@ -1,0 +1,8 @@
+#vcenter:
+  #baseUrl: https://192.168.11.105
+  #username: administrator@thoughtworks.cn
+  #password: 1qaz@WSX
+
+#neo4j:
+  #host: 192.168.99.100
+  #port: 7474
