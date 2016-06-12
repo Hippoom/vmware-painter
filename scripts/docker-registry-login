@@ -1,0 +1,28 @@
+#!/usr/bin/expect
+
+set user $env(DOCKER_REGISTRY_USER)
+set pass $env(DOCKER_REGISTRY_PASS)
+set email $env(DOCKER_REGISTRY_EMAIL)
+
+spawn docker login index.alauda.cn
+
+expect {
+
+  "Login Succeeded" {
+    exit
+  }
+  "Username" {
+    send "${user}\r"
+    exp_continue
+  }
+  "Password" {
+    send "${pass}\r"
+    exp_continue
+  }
+  "Email" {
+    send "${email}\r"
+    exp_continue
+  }
+
+}
+expect eof

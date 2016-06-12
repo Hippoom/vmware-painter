@@ -1,3 +1,4 @@
 # local
 vmware.dev.yml
 logs/*.log
+build/version

@@ -1,6 +1,7 @@
 # local
 vmware.dev.yml
 logs/
+build/
 
 # doc
 *.md
