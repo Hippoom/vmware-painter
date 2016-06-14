@@ -1,6 +1,6 @@
 # vmware-painter
 
-Painter for VMware, current release is `0.2.0-8-0c52222`
+Painter for VMware, current release is `0.2.0-9-2377cad`
 
 ## How to run it
 
