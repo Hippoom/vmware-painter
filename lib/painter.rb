@@ -48,40 +48,49 @@ host_group.each do |host|
 
   log.debug "Begin to paint #{host._ref}..."
   # HostSystem
-  host_node = Neography::Node.create_unique("idx_host",
-    "id",
-    host._ref,
+  host_node = Neography::Node.create_unique("idx_obj_id",
+    "obj_id",
+    host.name,
     {
-      "id" => host._ref
+      "obj_id" => host.name
     },
     neo
   )
   # all properties should be updated after the node creation
   # otherwise the properties won't get updated if the node exists
-  host_node["name"] = host.name,
-  host_node["host"] = host.name,
+  host_node["name"] = host.name
+  host_node["hostname"] = host.name
   host_node["ipAddress"] = host.name
+  host_node["ref"] = host._ref
   host_node.add_labels("Host")
 
   # Datastore
   datastore_nodes = host.datastore.map do |ds|
     log.debug "Begin to paint #{ds._ref}."
-    datastore_node = Neography::Node.create_unique("idx_datastore",
-      "id",
-      ds._ref,
+    datastore_node = Neography::Node.create_unique("idx_obj_id",
+      "obj_id",
+      ds.name,
       {
-        "id" => ds._ref
+        "obj_id" => ds.name
       },
       neo
     )
+    datastore_node["ref"] = ds._ref
     datastore_node["name"] = ds.name
     datastore_node.add_labels("Datastore")
-    neo.create_unique_relationship("idx_ds_host",
-      "ds_host",
-      "#{datastore_node.id}-#{host_node.id}",
-      "mountedAt",
+    mounted_at = neo.create_unique_relationship("idx_obj_relationship",
+      "dependsOn",
+      {
+        "datastore" => datastore_node.obj_id,
+        "host" => host_node.obj_id
+      },
+      "mounted",
       datastore_node,
-      host_node)
+      host_node,
+      {
+        "start" => host_node.obj_id,
+        "end" => datastore_node.obj_id
+      })
     log.debug "Finish to paint #{ds._ref}."
     datastore_node
   end
@@ -89,33 +98,50 @@ host_group.each do |host|
   # VirtualMachine
   host.vm.each do |vm|
     log.debug "Begin to paint #{vm._ref}."
-    vm_node = Neography::Node.create_unique("idx_vm",
-      "id",
-      vm._ref,
-      {
-        "id" => vm._ref
-      },
-      neo)
-    vm_node["name"] = vm.name
-    vm_node["host"] = vm.guest.hostName if vm.guest.hostName
-    vm_node["ipAddress"] = vm.guest.ipAddress if vm.guest.ipAddress
-    vm_node.add_labels("VirtualMachine")
-    neo.create_unique_relationship("idx_vm_host",
-      "vm_id",
-      vm.name,
-      "hostedAt",
-      vm_node,
-      host_node) # every vm is hosted at one and only one host
+    if vm.guest.hostName
+      vm_node = Neography::Node.create_unique("idx_obj_id",
+        "obj_id",
+        vm.guest.hostName,
+        {
+          "obj_id" => vm.guest.hostName
+        },
+        neo)
+      vm_node["ref"] = vm._ref
+      vm_node["name"] = vm.name
+      vm_node["hostname"] = vm.guest.hostName if vm.guest.hostName
+      vm_node["ipAddress"] = vm.guest.ipAddress if vm.guest.ipAddress
+      vm_node.add_labels("VirtualMachine")
+      neo.create_unique_relationship("idx_obj_relationship",
+        "dependsOn",
+        {
+          "vm" => vm_node.obj_id,
+          "host" => host_node.obj_id
+        },
+        "hostedAt",
+        vm_node,
+        host_node,
+        {
+          "start" => vm_node.obj_id,
+          "end" => host_node.obj_id
+        }) # every vm is hosted at one and only one host
 
-    vm.datastore.each do |ds|
+      vm.datastore.each do |ds|
 
-      datastore_node = datastore_nodes.detect {|d| d["name"] == ds.name}
-      neo.create_unique_relationship("idx_ds_vm",
-        "ds_vm",
-        "#{datastore_node.id}-#{vm_node.id}",
-        "mountedAt",
+        datastore_node = datastore_nodes.detect {|d| d["name"] == ds.name}
+        neo.create_unique_relationship("idx_obj_relationship",
+        "dependsOn",
+        {
+          "vm" => vm_node.obj_id,
+          "datastore" => datastore_node.obj_id
+        },
+        "mounted",
         datastore_node,
-        vm_node)
+        vm_node,
+        {
+          "start" => vm_node.obj_id,
+          "end" => datastore_node.obj_id
+        })
+      end
     end
     log.debug "Finish to paint #{vm._ref}."
   end
