@@ -31,8 +31,18 @@ if logging
 end
 
 Neography.configure do |config|
-  config.server               = neo4j["host"]
-  config.port                 = neo4j["port"]
+  config.protocol             = neo4j["protocol"] if neo4j["protocol"]
+  config.server               = neo4j["host"] if neo4j["host"]
+  config.port                 = neo4j["port"] if neo4j["port"]
+  config.log_enabled          = neo4j["log_enabled"] if neo4j["log_enabled"]
+  config.log_file          = neo4j["log_file"] if neo4j["log_file"]
+  config.slow_log_threshold   = neo4j["slow_log_threshold"] if neo4j["slow_log_threshold"]
+  config.max_threads          = neo4j["max_threads"] if neo4j["max_threads"]
+  config.authentication       = neo4j["authentication"] if neo4j["authentication"]
+  config.username             = neo4j["user"] if neo4j["user"]
+  config.password             = neo4j["password"] if neo4j["password"]
+  config.http_send_timeout    = neo4j["http_send_timeout"] if neo4j["http_send_timeout"]
+  config.http_receive_timeout = neo4j["http_receive_timeout"] if neo4j["http_receive_timeout"]
 end
 
 neo = Neography::Rest.new

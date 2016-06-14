@@ -4,8 +4,18 @@
   #password: 1qaz@WSX
 
 #neo4j:
+  #protocol: http
   #host: 192.168.99.100
   #port: 7474
+  #log_enabled: false
+  #slow_log_threshold: 0    # time in ms for query logging
+  #max_threads: 20
+  #authentication: nil  # 'basic' or 'digest'
+  #user: nil
+  #password: nil
+  #http_send_timeout: 1200
+  #http_receive_timeout: 1200
+
 
 #logging:
   #level: INFO
