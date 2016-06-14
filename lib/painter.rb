@@ -60,7 +60,7 @@ host_group.each do |host|
   # otherwise the properties won't get updated if the node exists
   host_node["name"] = host.name
   host_node["hostname"] = host.name
-  host_node["ipAddress"] = host.name
+  host_node["ip_addr"] = host.name
   host_node["ref"] = host._ref
   host_node.add_labels("Host")
 
@@ -79,7 +79,7 @@ host_group.each do |host|
     datastore_node["name"] = ds.name
     datastore_node.add_labels("Datastore")
     mounted_at = neo.create_unique_relationship("idx_obj_relationship",
-      "dependsOn",
+      "depends_on",
       {
         "datastore" => datastore_node.obj_id,
         "host" => host_node.obj_id
@@ -109,15 +109,15 @@ host_group.each do |host|
       vm_node["ref"] = vm._ref
       vm_node["name"] = vm.name
       vm_node["hostname"] = vm.guest.hostName if vm.guest.hostName
-      vm_node["ipAddress"] = vm.guest.ipAddress if vm.guest.ipAddress
+      vm_node["ip_addr"] = vm.guest.ipAddress if vm.guest.ipAddress
       vm_node.add_labels("VirtualMachine")
       neo.create_unique_relationship("idx_obj_relationship",
-        "dependsOn",
+        "depends_on",
         {
           "vm" => vm_node.obj_id,
           "host" => host_node.obj_id
         },
-        "hostedAt",
+        "hosted_at",
         vm_node,
         host_node,
         {
@@ -129,7 +129,7 @@ host_group.each do |host|
 
         datastore_node = datastore_nodes.detect {|d| d["name"] == ds.name}
         neo.create_unique_relationship("idx_obj_relationship",
-        "dependsOn",
+        "depends_on",
         {
           "vm" => vm_node.obj_id,
           "datastore" => datastore_node.obj_id
