@@ -47,6 +47,8 @@ end
 
 neo = Neography::Rest.new
 
+batch_timestamp = DateTime.now.to_s
+
 vim = RbVmomi::VIM.connect host: vcenter["host"], user: vcenter["user"], password: vcenter["password"], insecure: true
 datacenter = vim.serviceInstance.find_datacenter(vcenter["datacenter"]) or fail "datacenter not found"
 host_cluster_group = datacenter.hostFolder.childEntity.grep(RbVmomi::VIM::ClusterComputeResource)
@@ -72,6 +74,7 @@ host_group.each do |host|
   host_node["hostname"] = host.name
   host_node["ip_addr"] = host.name
   host_node["ref"] = host._ref
+  host_node["batch_timestamp"] = batch_timestamp
   host_node.add_labels("Host")
 
   # Datastore
@@ -87,6 +90,7 @@ host_group.each do |host|
     )
     datastore_node["ref"] = ds._ref
     datastore_node["name"] = ds.name
+    datastore_node["batch_timestamp"] = batch_timestamp
     datastore_node.add_labels("Datastore")
     mounted_at = neo.create_unique_relationship("idx_obj_relationship",
       "depends_on",
@@ -120,6 +124,7 @@ host_group.each do |host|
       vm_node["name"] = vm.name
       vm_node["hostname"] = vm.guest.hostName if vm.guest.hostName
       vm_node["ip_addr"] = vm.guest.ipAddress if vm.guest.ipAddress
+      vm_node["batch_timestamp"] = batch_timestamp
       vm_node.add_labels("VirtualMachine")
       neo.create_unique_relationship("idx_obj_relationship",
         "depends_on",
@@ -157,3 +162,7 @@ host_group.each do |host|
   end
   log.debug "Finish to paint #{host._ref}."
 end
+
+# drop out-of-date nodes
+no_longer_exists = neo.execute_query("START no_longer_exists=node(*) WHERE NOT no_longer_exists.batch_timestamp = \"#{batch_timestamp}\" DELETE no_longer_exists")
+log.debug "Drop nodes that no longer exist: #{no_longer_exists}"
