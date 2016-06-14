@@ -1,6 +1,6 @@
 # vmware-painter
 
-Painter for VMware, current release is `3-e24b871`
+Painter for VMware, current release is `0.2.0-8-0c52222`
 
 ## How to run it
 
@@ -18,19 +18,18 @@ The configuration items are listed here:
     neo4j:
       host: 192.168.99.100
       port: 7474
-    
+
     logging:
       level: INFO  
-      
+
 ## How to contribute
 
 Please use `vmware.dev.yml` for your local profile because `vmware.yml` is a shared file.
 
 You can config your rbenv by entering `rbenv local $(cat .ruby-version)`.  
 
-You can run the painter with 
+You can run the painter with
 
     ruby lib/painter -c ./vmware.dev.yml
 
 You can find the build pipeline [here](https://10.202.128.140:8154/go/tab/pipeline/history/vmware-painter-build).
-

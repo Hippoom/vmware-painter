@@ -5,7 +5,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 rm -rf "$project_home"/build/version
 
-echo $BUILD_NUM > "$project_home"/build/version
+echo 0.2.0-$BUILD_NUM > "$project_home"/build/version
 
 version=$(cat "$project_home"/build/version)
 
